@@ -67,7 +67,7 @@ export default (app: Elysia) => {
       data: Object.entries(eloRankings).map(([name, data]) => ({
           name,
           ...data
-      }))
+      })).sort((a, b) => b.elo - a.elo)
     }
   }, {
     response: t.Object({

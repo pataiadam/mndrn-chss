@@ -2,7 +2,7 @@
 import {ref, onMounted} from "vue";
 import type { Header, Item } from "vue3-easy-data-table";
 
-const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL
 
 const headers: Header[] = [
   { text: "Név", value: "name" },
@@ -149,13 +149,21 @@ const deleteGame = async (id: number) => {
       <h1>Játékok</h1>
       <form @submit.prevent="addNewGame" class="add-game-form">
         <input type="text" v-model="newGame.white" placeholder="Fehér játékos" />
+        <label>
+          <input type="radio" v-model="newGame.result" value="W" />
+          Fehér
+        </label>
+
+        <label>
+          <input type="radio" v-model="newGame.result" value="T" />
+          Döntetlen
+        </label>
+
+        <label>
+          <input type="radio" v-model="newGame.result" value="B" />
+          Fekete
+        </label>
         <input type="text" v-model="newGame.black" placeholder="Fekete játékos" />
-        <select v-model="newGame.result">
-          <option value="">Eredmény</option>
-          <option value="W">Fehér</option>
-          <option value="B">Fekete</option>
-          <option value="T">Döntetlen</option>
-        </select>
         <button type="submit">Játék hozzáadása</button>
       </form>
       <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
@@ -170,6 +178,12 @@ const deleteGame = async (id: number) => {
           :items="gamesItems">
         <template #item-actions="{ id }">
           <button v-if="id === highestId" @click="deleteGame(id)">Törlés</button>
+        </template>
+        <template #item-white="{ white, result }">
+          <div :class="{'green-bg': result === 'Fehér'}">{{ white }}</div>
+        </template>
+        <template #item-black="{ black, result }">
+          <div :class="{'green-bg': result === 'Fekete'}">{{ black }}</div>
         </template>
       </EasyDataTable>
     </div>
@@ -210,6 +224,10 @@ const deleteGame = async (id: number) => {
 .error-message {
   color: red;
   text-align: center;
+}
+
+.green-bg {
+  background-color: #375e3c;
 }
 
 .customize-table {
