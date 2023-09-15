@@ -28,6 +28,13 @@ const gamesHeaders: Header[] = [
 const gamesItems = ref<Item[]>([]);
 let highestId = ref<number | null>(null);
 
+const groupHeaders = [
+  { text: "Csoport A", value: "groupA" },
+  { text: "Csoport B", value: "groupB" },
+  // ...
+];
+const groupedPlayers = ref<Item[]>([]);
+
 const fetchEloData = async () => {
   const response = await fetch(`${API_URL}/elo`);
   const data = await response.json();
@@ -54,6 +61,26 @@ const fetchGamesData = async () => {
 const fetchAllData = async () => {
   await fetchEloData();
   await fetchGamesData();
+
+  // Csoportok kialakítása az items alapján
+  groupedPlayers.value = items.value.reduce((acc,player, index) => {
+    const name = player.name;
+    const group = index % 2 === 0 ? 'A' : 'B';
+
+
+    // [{groupA: playa1, groupB: player2}, {groupA: player3, groupB: player4}, ...]
+    if (index % 2 === 0) {
+      acc.push({
+        groupA: name,
+        groupB: ""
+      });
+    } else {
+      acc[acc.length - 1].groupB = name;
+    }
+
+    return acc;
+  }, []);
+
 };
 
 onMounted(() => {
@@ -133,6 +160,21 @@ const deleteGame = async (id: number) => {
 
 <template>
   <div class="container">
+    <h1>Mondriaan Sakk 2023</h1>
+
+    <div>
+      <h1>Csoportok</h1>
+      <h6>A jelenlegi rangsor szerint</h6>
+      <EasyDataTable
+          theme-color="#1d90ff"
+          table-class-name="customize-table"
+          header-text-direction="center"
+          body-text-direction="center"
+          hide-footer
+          :headers="groupHeaders"
+          :items="groupedPlayers"
+      />
+    </div>
     <div>
       <h1>Rangsor</h1>
       <EasyDataTable
@@ -145,6 +187,7 @@ const deleteGame = async (id: number) => {
           :items="items"
       />
     </div>
+
     <div>
       <h1>Játékok</h1>
       <form @submit.prevent="addNewGame" class="add-game-form">
