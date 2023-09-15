@@ -63,12 +63,15 @@ const fetchAllData = async () => {
   await fetchGamesData();
 
   // Csoportok kialakítása az items alapján
-  groupedPlayers.value = items.value.reduce((acc,player, index) => {
+  let index = -1;
+  groupedPlayers.value = items.value.reduce((acc,player) => {
+    if (player.totalGames <= 3) {
+      return acc;
+    }
+    index++;
+
     const name = player.name;
-    const group = index % 2 === 0 ? 'A' : 'B';
 
-
-    // [{groupA: playa1, groupB: player2}, {groupA: player3, groupB: player4}, ...]
     if (index % 2 === 0) {
       acc.push({
         groupA: name,
@@ -185,7 +188,11 @@ const deleteGame = async (id: number) => {
           hide-footer
           :headers="headers"
           :items="items"
-      />
+      >
+        <template #item-name="{ name, totalGames }">
+          <div :class="{'green-bg': totalGames > 3}">{{ name }}</div>
+        </template>
+      </EasyDataTable>
     </div>
 
     <div>
